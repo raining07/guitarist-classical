@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: com.xpizza:sqllite:3.21.0" level="project" />
     <orderEntry type="library" name="Maven: com.xpizza:guitarist-bass:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.poi:poi-ooxml:3.14" level="project" />
     <orderEntry type="library" name="Maven: org.apache.poi:poi:3.14" level="project" />
@@ -19,6 +20,5 @@
     <orderEntry type="library" name="Maven: org.apache.xmlbeans:xmlbeans:2.6.0" level="project" />
     <orderEntry type="library" name="Maven: stax:stax-api:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.virtuald:curvesapi:1.03" level="project" />
-    <orderEntry type="library" name="Maven: com.xpizza:sqllite:3.21.0" level="project" />
   </component>
 </module>
