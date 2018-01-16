@@ -28,9 +28,13 @@
             <artifactId>guitarist-bass</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <!--
+        mvn install:install-file -DgroupId=com.xpizza -DartifactId=sqllite -Dversion=3.21.0 -Dpackaging=jar -Dfile=/media/xpizza/datadisk/downloads/sqlite-jdbc-3.21.0.jar
+        -->
         <dependency>
-            <groupId></groupId>
-            <artifactId></artifactId>
+            <groupId>com.xpizza</groupId>
+            <artifactId>sqllite</artifactId>
+            <version>3.21.0</version>
         </dependency>
     </dependencies>
 
