@@ -12,7 +12,7 @@ public class Connection {
 
     private java.sql.Connection connection;
 
-    private boolean busy;
+    private boolean busy = false;
 
     public java.sql.Connection getConnection() {
         return connection;
@@ -32,14 +32,14 @@ public class Connection {
 
     /**
      * 构造器
+     * @param driver
      * @param url
      * @param username
      * @param password
-     * @param driver
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    public Connection(String url, String username, String password, String driver) throws ClassNotFoundException, SQLException {
+    public Connection(String driver, String url, String username, String password) throws ClassNotFoundException, SQLException {
         Class.forName(driver); // classLoader,加载对应驱动
         if(StringUtil.isEmpty(username)){
             connection = DriverManager.getConnection(url);
@@ -55,4 +55,15 @@ public class Connection {
         setBusy(false);
     }
 
+    /**
+     * 释放资源
+     * @throws SQLException
+     */
+    public void release() throws SQLException {
+        if(connection != null && !connection.isClosed()){
+            connection.close();
+        }
+        connection = null;
+        giveBack();
+    }
 }
