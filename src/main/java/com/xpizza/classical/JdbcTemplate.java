@@ -75,6 +75,23 @@ public class JdbcTemplate {
     }
 
     /**
+     * 执行SQL
+     * @param sql
+     */
+    public void update(String sql) {
+        Connection connection = DBUtil.getConnection();
+        Statement stmt = null;
+        try {
+            stmt = connection.getConnection().createStatement();
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.release(stmt, connection);
+        }
+    }
+
+    /**
      * 删除全表数据
      * @param tableName
      * @throws SQLException
