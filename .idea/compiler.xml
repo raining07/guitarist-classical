@@ -9,8 +9,5 @@
         <module name="guitarist-classical" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="guitarist-classical" target="1.7" />
-    </bytecodeTargetLevel>
   </component>
 </project>

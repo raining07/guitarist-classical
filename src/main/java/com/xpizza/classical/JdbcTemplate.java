@@ -22,29 +22,34 @@ public class JdbcTemplate {
         Connection connection = null;
         Statement stmt = null;
         ResultSet rs = null;
-        List<Map<String, Object>> list = null;
         try {
             connection = DBUtil.getConnection();
             stmt = connection.getConnection().createStatement();
             rs = stmt.executeQuery(sql);
-            ResultSetMetaData md = rs.getMetaData(); // 得到结果集(rs)的结构信息，比如字段数、字段名等
-            int columnCount = md.getColumnCount(); // 返回此 ResultSet 对象中的列数
-            list = new ArrayList<>();
-            Map<String, Object> rowData = new HashMap<>();
-            while (rs.next()) {
-                rowData = new HashMap<>(columnCount);
-                for (int i = 1; i <= columnCount; i++) {
-                    // key取小写
-                    rowData.put(md.getColumnName(i).toLowerCase(), rs.getObject(i));
-                }
-                list.add(rowData);
-            }
+            System.out.println("SQL:" + sql);
+            return resultsetToList(rs);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             DBUtil.release(rs, stmt, connection);
         }
-        System.out.println("SQL:" + sql);
+        return new ArrayList<>();
+    }
+
+    private List<Map<String,Object>> resultsetToList(ResultSet rs) throws SQLException {
+        List<Map<String, Object>> list = null;
+        ResultSetMetaData md = rs.getMetaData(); // 得到结果集(rs)的结构信息，比如字段数、字段名等
+        int columnCount = md.getColumnCount(); // 返回此 ResultSet 对象中的列数
+        list = new ArrayList<>();
+        Map<String, Object> rowData;
+        while (rs.next()) {
+            rowData = new HashMap<>(columnCount);
+            for (int i = 1; i <= columnCount; i++) {
+                // key取小写
+                rowData.put(md.getColumnName(i).toLowerCase(), rs.getObject(i));
+            }
+            list.add(rowData);
+        }
         return list;
     }
 
@@ -53,7 +58,7 @@ public class JdbcTemplate {
      * @param tableName
      * @return
      */
-    public List<Map<String, Object>> findTable(String tableName) {
+    public List<Map<String, Object>> queryAll(String tableName) {
         return queryForList("SELECT * FROM " + tableName);
     }
 
@@ -97,22 +102,14 @@ public class JdbcTemplate {
      * @throws SQLException
      */
     public void deleteTable(String tableName) throws SQLException {
-        Connection connection = DBUtil.getConnection();
-        Statement stmt = null;
-        try {
-            stmt = connection.getConnection().createStatement();
-            stmt.execute("DELETE FROM " + tableName);
-        } catch (SQLException exp) {
-            throw exp;
-        } finally {
-            DBUtil.release(stmt, connection);
-        }
+        String sql = "DELETE FROM " + tableName;
+        executeSql(sql);
     }
 
     /**
      * Insert with map
      */
-    public void mapInsert(Map<String, Object> valMap, String tableName) {
+    public void mapInsert(Map<String, Object> valMap, String tableName) throws SQLException {
         Assert.isNotEmpty(valMap, "执行mapInsert时valMap不能为空");
         StringBuffer insertSql = new StringBuffer("INSERT INTO ").append(tableName).append(" (");
         StringBuffer placeholders = new StringBuffer("?");// 形参:占位符String,以","分隔
@@ -131,23 +128,7 @@ public class JdbcTemplate {
         }
         insertSql.append(") values (");
         insertSql.append(placeholders).append(")");
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        try {
-            connection = DBUtil.getConnection();
-            stmt = connection.getConnection().prepareStatement(insertSql.toString());
-            argsIndex = 1;
-            for (Object arg : args) {
-                stmt.setObject(argsIndex, arg);
-                argsIndex++;
-            }
-            stmt.execute();
-            System.out.println("SQL:" + insertSql);
-        } catch (SQLException exp) {
-            throw new RuntimeException("插入数据库失败");
-        } finally {
-            DBUtil.release(stmt, connection);
-        }
+        executeSql(insertSql.toString(), args);
     }
 
     /**
@@ -156,7 +137,7 @@ public class JdbcTemplate {
      * @param whereMap
      * @param tableName
      */
-    public void mapUpdate(Map<String, Object> valMap, Map<String, Object> whereMap, String tableName) {
+    public void mapUpdate(Map<String, Object> valMap, Map<String, Object> whereMap, String tableName) throws SQLException {
         Assert.isNotEmpty(valMap, "执行mapUpdate时valMap不能为空");
         StringBuffer updateSql = new StringBuffer("UPDATE ").append(tableName).append(" SET ");
         Object[] args = new Object[valMap.size() + whereMap.size()];
@@ -181,23 +162,7 @@ public class JdbcTemplate {
             argsIndex++;
         }
 
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        try {
-            connection = DBUtil.getConnection();
-            stmt = connection.getConnection().prepareStatement(updateSql.toString());
-            argsIndex = 1;
-            for (Object arg : args) {
-                stmt.setObject(argsIndex, arg);
-                argsIndex++;
-            }
-            stmt.execute();
-            System.out.println("SQL:" + updateSql);
-        } catch (SQLException exp) {
-            throw new RuntimeException("插入数据库失败");
-        } finally {
-            DBUtil.release(stmt, connection);
-        }
+        executeSql(updateSql.toString(), args);
     }
 
     /**
@@ -221,6 +186,39 @@ public class JdbcTemplate {
             index++;
         }
         return objs;
+    }
+
+    private void executeSql(String sql, Object[] args) throws SQLException {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        try {
+            connection = DBUtil.getConnection();
+            stmt = connection.getConnection().prepareStatement(sql);
+            int argsIndex = 1;
+            for (Object arg : args) {
+                stmt.setObject(argsIndex, arg);
+                argsIndex++;
+            }
+            stmt.execute();
+            System.out.println("SQL:" + sql);
+        } catch (SQLException exp) {
+            throw exp;
+        } finally {
+            DBUtil.release(stmt, connection);
+        }
+    }
+
+    private void executeSql(String sql) throws SQLException {
+        Connection connection = DBUtil.getConnection();
+        Statement stmt = null;
+        try {
+            stmt = connection.getConnection().createStatement();
+            stmt.execute(sql);
+        } catch (SQLException exp) {
+            throw exp;
+        } finally {
+            DBUtil.release(stmt, connection);
+        }
     }
 
 }
